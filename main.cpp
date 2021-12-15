@@ -110,7 +110,8 @@ OvenStove::FoodItem::~FoodItem()
     std::cout << "----------destructing FoodItem----------" << "\n";
 }
 
-void OvenStove::FoodItem::storeInFridge(int threshold, int expirationDuration){
+void OvenStove::FoodItem::storeInFridge(int threshold, int expirationDuration)
+{
     expirationDayRemain = expirationDuration;
     
     while (expirationDayRemain > threshold)
