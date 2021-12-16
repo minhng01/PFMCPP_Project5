@@ -69,7 +69,7 @@ namespace Example
 }
 
 
-#include <iostream>
+//#include <iostream>
 
 /*
  copied UDT 1:
@@ -93,6 +93,7 @@ struct OvenStove
         FoodItem();
         ~FoodItem();
 
+        void getFoodName();
         void storeInFridge(int dayRemain, int expirationDuration);
         void clean(std::string cleaningType = "Salted water");
         void season(std::string mainCondiment = "Pepper");
@@ -102,6 +103,7 @@ struct OvenStove
     OvenStove();
     ~OvenStove();
 
+    void getOvenBrand();
     void cookFoodOnBurner(int threshold, int numberOfAvailableBurner);
     void broilFood(FoodItem food, int temperature, int durationInMinute);
     void bakeFood(FoodItem food, int temperature, int durationInMinute, int rackId, bool preHeat);
@@ -136,6 +138,11 @@ OvenStove::FoodItem::FoodItem() : type("Poultry"),
 OvenStove::FoodItem::~FoodItem()
 {
     std::cout << "----------destructing FoodItem----------" << "\n";
+}
+
+void OvenStove::FoodItem::getFoodName()
+{
+    std::cout << "Food item name (Part 2): " << this->name << "\n";
 }
 
 void OvenStove::FoodItem::storeInFridge(int threshold, int expirationDuration)
@@ -208,6 +215,11 @@ void OvenStove::FoodItem::cut(int numberOfPortion, std::string tool)
     {
         std::cout << "Do nothing" << std::endl;
     }
+}
+
+void OvenStove::getOvenBrand()
+{
+    std::cout << "Oven stove brand name (Part 2): " << this->brandName << "\n";
 }
 
 void OvenStove::cookFoodOnBurner(int threshold, int totalBurner)
@@ -289,6 +301,7 @@ struct Camera
         Lens();
         ~Lens();
         
+        void getLensModel();
         void adjustFocalLength(int target);
         void cover();
         void zoom(float zoomMode = 1.0f);
@@ -298,6 +311,7 @@ struct Camera
     Camera();
     ~Camera();
 
+    void getCameraBrand();
     void adjustWhiteBalanceMode(int target);
     void shootPhoto(Lens currentLens, char shootingMode = 'A', bool lowLight = false);
     void recordVideo(Lens currentLens, int durationInSecond);
@@ -324,6 +338,11 @@ Camera::Camera()
 Camera::~Camera()
 {
     std::cout << "----------destructing Camera----------" << "\n";
+}
+
+void Camera::Lens::getLensModel()
+{
+    std::cout << "Lens model (Part 2): " << this->model << "\n";
 }
 
 void Camera::Lens::adjustFocalLength(int target)
@@ -395,6 +414,11 @@ void Camera::Lens::getFocus(double distanceToObject)
         // get focus on object
         std::cout << "Focus ready..." << std::endl;
     }
+}
+
+void Camera::getCameraBrand()
+{
+    std::cout << "Camera brand name (Part 2): " << this->brandName << "\n";
 }
 
 void Camera::adjustWhiteBalanceMode(int target)
@@ -570,6 +594,7 @@ struct System
     System();
     ~System();
 
+    void getWebcamResolution();
     void turnOnSystem(Laptop computer);
     void recordVideo(Camera camera, Camera::Lens defaultLens);
 };
@@ -582,6 +607,11 @@ System::System()
 System::~System()
 {
     std::cout << "----------destructing System----------" << "\n";
+}
+
+void System::getWebcamResolution()
+{
+    std::cout << "System camera resolution (Part 2): " << this->webcam.resolution << "\n";
 }
 
 void System::turnOnSystem(Laptop computer)
@@ -610,6 +640,7 @@ struct Kitchen
     Kitchen();
     ~Kitchen();
 
+    void getIngredientWeight();
     void makeDinner(OvenStove stove, OvenStove::FoodItem ingredient);
     void clean(OvenStove stove, OvenStove::FoodItem food);
 };
@@ -622,6 +653,11 @@ Kitchen::Kitchen()
 Kitchen::~Kitchen()
 {
     std::cout << "----------destructing Laptop----------" << "\n";
+}
+
+void Kitchen::getIngredientWeight()
+{
+    std::cout << "Main ingredient weight (Part 2): " << this->mainIngredient.weight << "\n";
 }
 
 void Kitchen::makeDinner(OvenStove stove, OvenStove::FoodItem ingredient)
@@ -658,6 +694,7 @@ int main()
 {
     OvenStove::FoodItem chicken;
     std::cout << "Food item name: " << chicken.name << "\n";
+    chicken.getFoodName();
     chicken.storeInFridge(1, 5);
     std::cout << "Expiration day remain: " << chicken.expirationDayRemain << std::endl;
     chicken.clean("Water");
@@ -667,6 +704,7 @@ int main()
 
     OvenStove oldOvenStove;
     std::cout << "Oven stove brand name: " << oldOvenStove.brandName << "\n";
+    oldOvenStove.getOvenBrand();
     oldOvenStove.cookFoodOnBurner(0, 4);
     std::cout << "Number of burner available to use: " << oldOvenStove.numberOfBurner << std::endl;
     oldOvenStove.broilFood(chicken, 375, 5);
@@ -676,6 +714,7 @@ int main()
 
     Camera::Lens myLens;
     std::cout << "Lens model: " << myLens.model << "\n";
+    myLens.getLensModel();
     myLens.adjustFocalLength(180);
     myLens.cover();
     myLens.zoom(0.5f);
@@ -684,6 +723,7 @@ int main()
 
     Camera camera;
     std::cout << "Camera brand name: " << camera.brandName << "\n";
+    camera.getCameraBrand();
     camera.adjustWhiteBalanceMode(3);
     camera.shootPhoto(myLens, 'A', false);
     camera.recordVideo(myLens, 40);
@@ -700,11 +740,15 @@ int main()
     std::cout << "\n";
 
     System system;
+    std::cout << "System camera resolution: " << system.webcam.resolution << "\n";
+    system.getWebcamResolution();
     system.turnOnSystem(laptop);
     system.recordVideo(camera, myLens);
     std::cout << "\n";
 
     Kitchen kitchen;
+    std::cout << "Main ingredient weight: " << kitchen.mainIngredient.weight << "\n";
+    kitchen.getIngredientWeight();
     kitchen.makeDinner(oldOvenStove, chicken);
     kitchen.clean(oldOvenStove, chicken);
     std::cout << "\n";
