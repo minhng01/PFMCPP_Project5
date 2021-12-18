@@ -67,8 +67,8 @@ void someMemberFunction(const Axe& axe);
  Suppress them by adding -Wno-exit-time-destructors to the .replit file with the other warning suppression flags
  */
 
-
-
+#include "iostream"
+#include "LeakedObjectDetector.h"
 
 /*
  copied UDT 1:
@@ -94,9 +94,11 @@ struct OvenStove
 
         void getFoodName();
         void storeInFridge(int dayRemain, int expirationDuration);
-        void clean(std::string cleaningType = "Salted water");
+        void clean(std::string cleaningType = "Salted water") const;
         void season(std::string mainCondiment = "Pepper");
         void cut(int numberOfPortion = 3, std::string tool = "Long knife");
+
+        JUCE_LEAK_DETECTOR(FoodItem)
     };
 
     OvenStove();
@@ -104,11 +106,23 @@ struct OvenStove
 
     void getOvenBrand();
     void cookFoodOnBurner(int threshold, int numberOfAvailableBurner);
-    void broilFood(FoodItem food, int temperature, int durationInMinute);
-    void bakeFood(FoodItem food, int temperature, int durationInMinute, int rackId, bool preHeat);
+    void broilFood(const FoodItem& food, int temperature, int durationInMinute);
+    void bakeFood(const FoodItem& food, int temperature, int durationInMinute, int rackId, bool preHeat) const;
     void lightUp(bool lightStatus);
 
     FoodItem mainIngredient;
+
+    JUCE_LEAK_DETECTOR(OvenStove)
+};
+
+struct OvenStoveWrapper
+{
+    OvenStoveWrapper(OvenStove* ptr) : pointerToOvenStove(ptr) {}
+    ~OvenStoveWrapper()
+    {
+        delete pointerToOvenStove;
+    }
+    OvenStove* pointerToOvenStove = nullptr;
 };
 
 OvenStove::OvenStove() : brandName("GE"),
@@ -161,7 +175,7 @@ void OvenStove::FoodItem::storeInFridge(int threshold, int expirationDuration)
     }
 }
 
-void OvenStove::FoodItem::clean(std::string cleaningType)
+void OvenStove::FoodItem::clean(std::string cleaningType) const
 {
     if (expirationDayRemain <= 0)
     {
@@ -237,14 +251,14 @@ void OvenStove::cookFoodOnBurner(int threshold, int totalBurner)
     }
 }
 
-void OvenStove::broilFood(OvenStove::FoodItem food, int temperature, int durationInMinute)
+void OvenStove::broilFood(const OvenStove::FoodItem& food, int temperature, int durationInMinute)
 {
     std::cout << "Broiling " + food.name 
                     + " at " + std::to_string(temperature) + "F"
                     + " in " + std::to_string(durationInMinute) + " minutes" + "\n";
 }
 
-void OvenStove::bakeFood(OvenStove::FoodItem food, int temperature, int durationInMinute, int rackId, bool preHeat)
+void OvenStove::bakeFood(const OvenStove::FoodItem& food, int temperature, int durationInMinute, int rackId, bool preHeat) const
 {
     if (rackId < 0)
     {
@@ -304,7 +318,9 @@ struct Camera
         void adjustFocalLength(int target);
         void cover();
         void zoom(float zoomMode = 1.0f);
-        void getFocus(double distanceToObject);
+        void getFocus(double distanceToObject) const;
+
+        JUCE_LEAK_DETECTOR(Lens)
     };
 
     Camera();
@@ -312,11 +328,23 @@ struct Camera
 
     void getCameraBrand();
     void adjustWhiteBalanceMode(int target);
-    void shootPhoto(Lens currentLens, char shootingMode = 'A', bool lowLight = false);
-    void recordVideo(Lens currentLens, int durationInSecond);
+    void shootPhoto(const Lens& currentLens, char shootingMode = 'A', bool lowLight = false);
+    void recordVideo(const Lens& currentLens, int durationInSecond) const;
     void playFlash(bool lowLightIntensity = true);
 
     Lens includedLens;
+
+    JUCE_LEAK_DETECTOR(Camera)
+};
+
+struct CameraWrapper
+{
+    CameraWrapper(Camera* ptr) : pointerToCamera(ptr) {}
+    ~CameraWrapper()
+    {
+        delete pointerToCamera;
+    }
+    Camera* pointerToCamera = nullptr;
 };
 
 Camera::Lens::Lens()
@@ -398,7 +426,7 @@ void Camera::Lens::zoom(float zoomMode)
     }
 }
 
-void Camera::Lens::getFocus(double distanceToObject)
+void Camera::Lens::getFocus(double distanceToObject) const
 {
     if (distanceToObject < 1)
     {
@@ -451,7 +479,7 @@ void Camera::adjustWhiteBalanceMode(int target)
     std::cout << "Current white balance mode: " << currentWhiteBalanceMode << "\n";
 }
 
-void Camera::shootPhoto(Camera::Lens currentLens, char shootingMode, bool lowLight)
+void Camera::shootPhoto(const Camera::Lens& currentLens, char shootingMode, bool lowLight)
 {
     currentLens.getFocus(50); // assume default value 50 for photo
     
@@ -469,7 +497,7 @@ void Camera::shootPhoto(Camera::Lens currentLens, char shootingMode, bool lowLig
     }
 }
 
-void Camera::recordVideo(Camera::Lens currentLens, int durationInSecond)
+void Camera::recordVideo(const Camera::Lens& currentLens, int durationInSecond) const
 {
     currentLens.getFocus(70); // assume default value 70 for video
     std::cout << "Recording...";
@@ -503,6 +531,18 @@ struct Laptop
     void connectToWifi(bool connectionStatus = false);
     std::string checkAvailableOSUpdate(int currentOSId);
     void playAudio(int audioFileId = 0, int volume = 50, std::string playMode = "Headphones");
+
+    JUCE_LEAK_DETECTOR(Laptop)
+};
+
+struct LaptopWrapper
+{
+    LaptopWrapper(Laptop* ptr) : pointerToLaptop(ptr) {}
+    ~LaptopWrapper()
+    {
+        delete pointerToLaptop;
+    }
+    Laptop* pointerToLaptop = nullptr;
 };
 
 Laptop::Laptop() : modelName("Thinkpad"),
@@ -594,8 +634,20 @@ struct System
     ~System();
 
     void getWebcamResolution();
-    void turnOnSystem(Laptop computer);
-    void recordVideo(Camera camera, Camera::Lens defaultLens);
+    void turnOnSystem(const Laptop& computer);
+    void recordVideo(const Camera& camera, const Camera::Lens& defaultLens);
+
+    JUCE_LEAK_DETECTOR(System)
+};
+
+struct SystemWrapper
+{
+    SystemWrapper(System* ptr) : pointerToSystem(ptr) {}
+    ~SystemWrapper()
+    {
+        delete pointerToSystem;
+    }
+    System* pointerToSystem = nullptr;
 };
 
 System::System()
@@ -613,7 +665,7 @@ void System::getWebcamResolution()
     std::cout << "System camera resolution (Part 2): " << this->webcam.resolution << "\n";
 }
 
-void System::turnOnSystem(Laptop computer)
+void System::turnOnSystem(const Laptop& computer)
 {
     std::cout << "Turning on system...\n";
     std::cout << "System info: \n";
@@ -621,7 +673,7 @@ void System::turnOnSystem(Laptop computer)
     std::cout << "RAM: " << computer.RAMSize << "\n";
 }
 
-void System::recordVideo(Camera camera, Camera::Lens defaultLens)
+void System::recordVideo(const Camera& camera, const Camera::Lens& defaultLens)
 {
     std::cout << "Using lens " << defaultLens.model << "\n";
     camera.recordVideo(defaultLens, 60);
@@ -640,8 +692,20 @@ struct Kitchen
     ~Kitchen();
 
     void getIngredientWeight();
-    void makeDinner(OvenStove stove, OvenStove::FoodItem ingredient);
-    void clean(OvenStove stove, OvenStove::FoodItem food);
+    void makeDinner(const OvenStove& stove, const OvenStove::FoodItem& ingredient);
+    void clean(const OvenStove& stove, const OvenStove::FoodItem& food);
+
+    JUCE_LEAK_DETECTOR(Kitchen)
+};
+
+struct KitchenWrapper
+{
+    KitchenWrapper(Kitchen* ptr) : pointerToKitchen(ptr) {}
+    ~KitchenWrapper()
+    {
+        delete pointerToKitchen;
+    }
+    Kitchen* pointerToKitchen = nullptr;
 };
 
 Kitchen::Kitchen()
@@ -659,13 +723,13 @@ void Kitchen::getIngredientWeight()
     std::cout << "Main ingredient weight (Part 2): " << this->mainIngredient.weight << "\n";
 }
 
-void Kitchen::makeDinner(OvenStove stove, OvenStove::FoodItem ingredient)
+void Kitchen::makeDinner(const OvenStove& stove, const OvenStove::FoodItem& ingredient)
 {
     std::cout << "Cooking dinner with " << ingredient.name << "...\n";
     stove.bakeFood(ingredient, 300, 60, 1, true);
 }
 
-void Kitchen::clean(OvenStove stove, OvenStove::FoodItem food)
+void Kitchen::clean(const OvenStove& stove, const OvenStove::FoodItem& food)
 {
     std::cout << "Cleaning kitchen...\n";
     std::cout << "Cleaning " << stove.brandName << " stove...\n";
@@ -701,14 +765,14 @@ int main()
     chicken.cut(4, "knife");
     std::cout << "\n";
 
-    OvenStove oldOvenStove;
-    std::cout << "Oven stove brand name: " << oldOvenStove.brandName << "\n";
-    oldOvenStove.getOvenBrand();
-    oldOvenStove.cookFoodOnBurner(0, 4);
-    std::cout << "Number of burner available to use: " << oldOvenStove.numberOfBurner << std::endl;
-    oldOvenStove.broilFood(chicken, 375, 5);
-    oldOvenStove.bakeFood(chicken, 275, 60, 0, true);
-    oldOvenStove.lightUp(false);
+    OvenStoveWrapper oldOvenStove(new OvenStove());
+    std::cout << "Oven stove brand name: " << oldOvenStove.pointerToOvenStove->brandName << "\n";
+    oldOvenStove.pointerToOvenStove->getOvenBrand();
+    oldOvenStove.pointerToOvenStove->cookFoodOnBurner(0, 4);
+    std::cout << "Number of burner available to use: " << oldOvenStove.pointerToOvenStove->numberOfBurner << std::endl;
+    oldOvenStove.pointerToOvenStove->broilFood(chicken, 375, 5);
+    oldOvenStove.pointerToOvenStove->bakeFood(chicken, 275, 60, 0, true);
+    oldOvenStove.pointerToOvenStove->lightUp(false);
     std::cout << "\n";
 
     Camera::Lens myLens;
@@ -720,36 +784,36 @@ int main()
     myLens.getFocus(50);
     std::cout << "\n";
 
-    Camera camera;
-    std::cout << "Camera brand name: " << camera.brandName << "\n";
-    camera.getCameraBrand();
-    camera.adjustWhiteBalanceMode(3);
-    camera.shootPhoto(myLens, 'A', false);
-    camera.recordVideo(myLens, 40);
-    camera.playFlash(true);
+    CameraWrapper camera(new Camera());
+    std::cout << "Camera brand name: " << camera.pointerToCamera->brandName << "\n";
+    camera.pointerToCamera->getCameraBrand();
+    camera.pointerToCamera->adjustWhiteBalanceMode(3);
+    camera.pointerToCamera->shootPhoto(myLens, 'A', false);
+    camera.pointerToCamera->recordVideo(myLens, 40);
+    camera.pointerToCamera->playFlash(true);
     std::cout << "\n";
 
-    Laptop laptop;
-    std::cout << "Brand model name: " << laptop.modelName << "\n";
-    std::cout << laptop.numberOfFileOnDisk(10, 200, 11, 15) << " files stored\n";
-    std::cout << "Available storage left: " << laptop.storageSize << std::endl;
-    laptop.connectToWifi(false);
-    std::cout << laptop.checkAvailableOSUpdate(3);
-    laptop.playAudio(2, 30, "Stereo speaker");
+    LaptopWrapper laptop(new Laptop());
+    std::cout << "Brand model name: " << laptop.pointerToLaptop->modelName << "\n";
+    std::cout << laptop.pointerToLaptop->numberOfFileOnDisk(10, 200, 11, 15) << " files stored\n";
+    std::cout << "Available storage left: " << laptop.pointerToLaptop->storageSize << std::endl;
+    laptop.pointerToLaptop->connectToWifi(false);
+    std::cout << laptop.pointerToLaptop->checkAvailableOSUpdate(3);
+    laptop.pointerToLaptop->playAudio(2, 30, "Stereo speaker");
     std::cout << "\n";
 
-    System system;
-    std::cout << "System camera resolution: " << system.webcam.resolution << "\n";
-    system.getWebcamResolution();
-    system.turnOnSystem(laptop);
-    system.recordVideo(camera, myLens);
+    SystemWrapper system(new System());
+    std::cout << "System camera resolution: " << system.pointerToSystem->webcam.resolution << "\n";
+    system.pointerToSystem->getWebcamResolution();
+    system.pointerToSystem->turnOnSystem(*laptop.pointerToLaptop);
+    system.pointerToSystem->recordVideo(*camera.pointerToCamera, myLens);
     std::cout << "\n";
 
-    Kitchen kitchen;
-    std::cout << "Main ingredient weight: " << kitchen.mainIngredient.weight << "\n";
-    kitchen.getIngredientWeight();
-    kitchen.makeDinner(oldOvenStove, chicken);
-    kitchen.clean(oldOvenStove, chicken);
+    KitchenWrapper kitchen(new Kitchen());
+    std::cout << "Main ingredient weight: " << kitchen.pointerToKitchen->mainIngredient.weight << "\n";
+    kitchen.pointerToKitchen->getIngredientWeight();
+    kitchen.pointerToKitchen->makeDinner(*oldOvenStove.pointerToOvenStove, chicken);
+    kitchen.pointerToKitchen->clean(*oldOvenStove.pointerToOvenStove, chicken);
     std::cout << "\n";
 
     std::cout << "good to go!" << std::endl;
