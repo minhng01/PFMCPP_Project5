@@ -1,6 +1,4 @@
 #pragma once
-#include <iostream>
-#include "LeakedObjectDetector.h"
 #include "OvenStove.h"
 
 struct Kitchen
